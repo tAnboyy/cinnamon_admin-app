@@ -6,8 +6,15 @@
     "strict": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "types": ["react", "react-native"],
+    "types": [
+      "react",
+      "react-native"
+    ],
     "baseUrl": "."
   },
-  "include": ["src", "App.tsx"]
+  "include": [
+    "src",
+    "App.tsx"
+  ],
+  "extends": "expo/tsconfig.base"
 }

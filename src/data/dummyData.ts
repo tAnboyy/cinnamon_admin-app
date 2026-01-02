@@ -5,7 +5,9 @@ export interface Order {
     totalPrice: number;
     pickupTime: string;
     status: 'Pending' | 'Ready' | 'Completed' | 'Cancelled';
-    address?: string;
+  address?: string;
+  // ISO date string for when the order was placed
+  placedDate?: string;
   }
   
   export const orders: Order[] = [
@@ -16,6 +18,7 @@ export interface Order {
       totalPrice: 25.98,
       pickupTime: '12:30 PM',
       status: 'Pending',
+      placedDate: new Date().toISOString(),
     },
     {
       id: '2',
@@ -24,6 +27,8 @@ export interface Order {
       totalPrice: 15.99,
       pickupTime: '1:00 PM',
       status: 'Ready',
+      // yesterday
+      placedDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     },
     {
         id: '3',
@@ -33,6 +38,8 @@ export interface Order {
         pickupTime: 'Tomorrow, 6:00 PM',
         status: 'Pending',
         address: '123 Main St, Anytown, USA'
+        ,
+        placedDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     }
   ];
   

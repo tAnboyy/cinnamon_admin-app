@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Cinnamon Admin",
+    "slug": "cinnamon-admin",
+    "plugins": [
+      "expo-asset"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.anonymous.cinnamon-admin",
+      "statusBar": {
+        "barStyle": "dark"
+      }
+    },
+    "android": {
+      "statusBar": {
+        "backgroundColor": "#ffffff",
+        "barStyle": "dark-content",
+        "translucent": false
+      },
+      "package": "com.anonymous.cinnamonadmin"
+    }
+  }
+}
