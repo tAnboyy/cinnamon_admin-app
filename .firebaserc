@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "cinnamon-admin-f6927",
+    "dev": "cinnamon-admin-f6927"
+  },
+  "targets": {},
+  "etags": {}
+}

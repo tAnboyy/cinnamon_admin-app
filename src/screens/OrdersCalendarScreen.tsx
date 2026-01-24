@@ -30,6 +30,7 @@ interface AdminOrder {
   address?: string;
   placedDateObj: Date;
   isPrinted?: boolean;
+  paymentMethod?: string;
 }
 
 function startOfMonth(d: Date) {
@@ -201,8 +202,9 @@ const OrdersCalendarScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
+    <View style={styles.wrapper}>
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="dark" />
       <View style={styles.monthHeader}>
         <TouchableOpacity onPress={() => changeMonth(-1)} style={styles.arrowBtn} accessibilityLabel="Previous month">
           <Text style={styles.arrowText}>‹</Text>
@@ -254,6 +256,7 @@ const OrdersCalendarScreen = () => {
               <View style={{ flex: 1 }}>
                 <Text style={styles.orderTitle}>{item.customerName}</Text>
                 <Text style={styles.orderMeta}>{item.pickupTime || 'Pickup TBD'}</Text>
+                <Text style={styles.orderMeta}>Payment: {item.paymentMethod || '—'}</Text>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
                 <Text style={styles.orderAmount}>${item.totalPrice.toFixed(2)}</Text>
@@ -278,6 +281,7 @@ const OrdersCalendarScreen = () => {
               <Text style={styles.modalLine}>Customer: {selectedOrder.customerName}</Text>
               <Text style={styles.modalLine}>Status: {selectedOrder.status}</Text>
               <Text style={styles.modalLine}>Pickup: {selectedOrder.pickupTime || 'TBD'}</Text>
+              <Text style={styles.modalLine}>Payment: {selectedOrder.paymentMethod || '—'}</Text>
               {selectedOrder.address ? <Text style={styles.modalLine}>Address: {selectedOrder.address}</Text> : null}
               {selectedOrder.isPrinted && <Text style={styles.modalPrintedLine}>✓ This order has been printed</Text>}
               <Text style={[styles.modalLine, { fontWeight: '600', marginTop: 12 }]}>Items</Text>
@@ -387,11 +391,13 @@ const OrdersCalendarScreen = () => {
         </View>
       </Modal>
     </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#fafafa' },
+  wrapper: { flex: 1, backgroundColor: '#ffffff' },
+  container: { flex: 1, padding: 16, backgroundColor: '#ffffff', margin: 16 },
   monthHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   arrowBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#eee' },
   arrowText: { fontSize: 20, fontWeight: '600' },
@@ -404,7 +410,7 @@ const styles = StyleSheet.create({
   dayTextSelected: { color: '#fff' },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#2e7d32', position: 'absolute', bottom: 6 },
   dayToolbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, marginBottom: 8 },
-  listHeaderText: { fontWeight: '600', fontSize: 16 },
+  listHeaderText: { fontWeight: '600', fontSize: 16, marginHorizontal: 8 },
   errorText: { color: '#d32f2f', marginTop: 4 },
   printButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#ffd723', justifyContent: 'center', alignItems: 'center', marginLeft: 12, elevation: 2 },
   printButtonDisabled: { backgroundColor: '#e0e0e0', opacity: 0.6 },
@@ -573,6 +579,7 @@ function normalizeOrder(raw: any): AdminOrder {
     address: raw.address,
     placedDateObj,
     isPrinted: raw.isPrinted ?? false,
+    paymentMethod: raw.paymentMethod,
   };
 }
 
