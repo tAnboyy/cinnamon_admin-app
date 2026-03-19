@@ -26,3 +26,38 @@ export async function fetchAllOrders() {
   }
   return response.json();
 }
+
+export async function fetchMenuItems() {
+  const base = API_BASE ?? 'https://cinnamonbackend-production.up.railway.app';
+  const response = await fetch(`${base}/api/menu/all`);
+  if (!response.ok) throw new Error(`Failed to load menu items: ${response.status}`);
+  return response.json();
+}
+
+export async function createMenuItem(item: object) {
+  const base = API_BASE ?? 'https://cinnamonbackend-production.up.railway.app';
+  const response = await fetch(`${base}/api/menu`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(item),
+  });
+  if (!response.ok) throw new Error(`Failed to create menu item: ${response.status}`);
+  return response.json();
+}
+
+export async function updateMenuItem(id: string, item: object) {
+  const base = API_BASE ?? 'https://cinnamonbackend-production.up.railway.app';
+  const response = await fetch(`${base}/api/menu/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(item),
+  });
+  if (!response.ok) throw new Error(`Failed to update menu item: ${response.status}`);
+  return response.json();
+}
+
+export async function deleteMenuItem(id: string) {
+  const base = API_BASE ?? 'https://cinnamonbackend-production.up.railway.app';
+  const response = await fetch(`${base}/api/menu/${id}`, { method: 'DELETE' });
+  if (!response.ok) throw new Error(`Failed to delete menu item: ${response.status}`);
+}

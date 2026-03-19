@@ -261,7 +261,9 @@ const OrdersCalendarScreen = () => {
               <View style={{ alignItems: 'flex-end' }}>
                 <Text style={styles.orderAmount}>${item.totalPrice.toFixed(2)}</Text>
                 <View style={styles.statusRow}>
-                  <Text style={[styles.statusBadge, statusColor(item.status)]}>{item.status || 'Pending'}</Text>
+                  <View style={[styles.statusBadge, statusColor(item.status)]}>
+                    <Text style={[styles.statusBadgeText, { color: statusColor(item.status).color }]}>{item.status || 'Pending'}</Text>
+                  </View>
                   {item.isPrinted && <Text style={styles.printedBadge}>✓ Printed</Text>}
                 </View>
               </View>
@@ -274,33 +276,80 @@ const OrdersCalendarScreen = () => {
       )}
 
       {selectedOrder && (
-        <Modal visible animationType="slide" onRequestClose={() => setSelectedOrder(null)}>
-          <SafeAreaView style={{ flex: 1 }}>
-            <ScrollView contentContainerStyle={styles.modalContent}>
-              <Text style={styles.modalTitle}>Order #{selectedOrder.id}</Text>
-              <Text style={styles.modalLine}>Customer: {selectedOrder.customerName}</Text>
-              <Text style={styles.modalLine}>Status: {selectedOrder.status}</Text>
-              <Text style={styles.modalLine}>Pickup: {selectedOrder.pickupTime || 'TBD'}</Text>
-              <Text style={styles.modalLine}>Payment: {selectedOrder.paymentMethod || '—'}</Text>
-              {selectedOrder.address ? <Text style={styles.modalLine}>Address: {selectedOrder.address}</Text> : null}
-              {selectedOrder.isPrinted && <Text style={styles.modalPrintedLine}>✓ This order has been printed</Text>}
-              <Text style={[styles.modalLine, { fontWeight: '600', marginTop: 12 }]}>Items</Text>
-              {selectedOrder.items.map((it, idx) => (
-                <View key={`${selectedOrder.id}-${idx}`} style={styles.modalItemRow}>
-                  <Text>{it.name}</Text>
-                  <Text>× {it.quantity}</Text>
-                </View>
-              ))}
-              <Text style={styles.modalTotal}>Total: ${selectedOrder.totalPrice.toFixed(2)}</Text>
+        <Modal visible animationType="fade" transparent onRequestClose={() => setSelectedOrder(null)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCard}>
 
-              <View style={{ marginTop: 16 }}>
-                <Button title="Mark Ready" onPress={() => markOrderReady(selectedOrder.id)} />
+              {/* Header */}
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalHeaderTitle}>Order Details</Text>
+                <TouchableOpacity onPress={() => setSelectedOrder(null)} style={styles.modalCloseBtn}>
+                  <Text style={styles.modalCloseBtnText}>✕</Text>
+                </TouchableOpacity>
               </View>
-              <View style={{ marginTop: 12 }}>
-                <Button title="Close" onPress={() => setSelectedOrder(null)} />
+
+              <ScrollView contentContainerStyle={styles.modalBody}>
+
+                {/* Order ID + status row */}
+                <View style={styles.modalIdRow}>
+                  <View style={styles.modalIdTag}>
+                    <Text style={styles.modalIdText}>#{selectedOrder.id}</Text>
+                  </View>
+                  <View style={[styles.statusBadge, statusColor(selectedOrder.status)]}>
+                    <Text style={[styles.statusBadgeText, { color: statusColor(selectedOrder.status).color }]}>
+                      {selectedOrder.status || 'Pending'}
+                    </Text>
+                  </View>
+                  {selectedOrder.isPrinted && (
+                    <View style={styles.printedTag}>
+                      <Text style={styles.printedTagText}>✓ Printed</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Info grid */}
+                <View style={styles.infoGrid}>
+                  <InfoCell label="Customer" value={selectedOrder.customerName} />
+                  <InfoCell label="Pickup" value={selectedOrder.pickupTime || 'TBD'} />
+                  <InfoCell label="Payment" value={selectedOrder.paymentMethod || '—'} />
+                  {selectedOrder.address && <InfoCell label="Address" value={selectedOrder.address} wide />}
+                </View>
+
+                {/* Items */}
+                <View style={styles.itemsSection}>
+                  <Text style={styles.itemsSectionTitle}>Items</Text>
+                  {selectedOrder.items.map((it, idx) => (
+                    <View key={`${selectedOrder.id}-${idx}`} style={[styles.modalItemRow, idx < selectedOrder.items.length - 1 && styles.modalItemRowBorder]}>
+                      <Text style={styles.modalItemName}>{it.name}</Text>
+                      <View style={styles.qtyBadge}>
+                        <Text style={styles.qtyBadgeText}>× {it.quantity}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+
+                {/* Total */}
+                <View style={styles.totalRow}>
+                  <Text style={styles.totalLabel}>Total</Text>
+                  <Text style={styles.totalValue}>${selectedOrder.totalPrice.toFixed(2)}</Text>
+                </View>
+
+              </ScrollView>
+
+              {/* Footer actions */}
+              <View style={styles.modalFooter}>
+                <TouchableOpacity style={styles.modalBtnClose} onPress={() => setSelectedOrder(null)}>
+                  <Text style={styles.modalBtnCloseText}>Close</Text>
+                </TouchableOpacity>
+                {selectedOrder.status !== 'Ready' && selectedOrder.status !== 'Completed' && (
+                  <TouchableOpacity style={styles.modalBtnReady} onPress={() => markOrderReady(selectedOrder.id)}>
+                    <Text style={styles.modalBtnReadyText}>Mark Ready</Text>
+                  </TouchableOpacity>
+                )}
               </View>
-            </ScrollView>
-          </SafeAreaView>
+
+            </View>
+          </View>
         </Modal>
       )}
 
@@ -420,15 +469,59 @@ const styles = StyleSheet.create({
   orderMeta: { color: '#666', marginTop: 2 },
   orderAmount: { fontWeight: '700', color: '#111' },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
-  statusBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, fontSize: 11, overflow: 'hidden', textTransform: 'capitalize' },
+  statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999, overflow: 'hidden' },
+  statusBadgeText: { fontSize: 11, fontWeight: '600', textTransform: 'capitalize' },
   printedBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 999, fontSize: 10, backgroundColor: '#e8f5e9', color: '#2e7d32', fontWeight: '600' },
   empty: { padding: 24, alignItems: 'center' },
-  modalContent: { padding: 20 },
-  modalTitle: { fontSize: 20, fontWeight: '700', marginBottom: 12 },
-  modalLine: { marginBottom: 8 },
-  modalPrintedLine: { marginBottom: 8, color: '#2e7d32', fontWeight: '600' },
-  modalItemRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
-  modalTotal: { marginTop: 12, fontWeight: '700' },
+  // Order detail modal
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+  modalCard: {
+    backgroundColor: '#fff', borderRadius: 16, width: '100%', maxWidth: 480,
+    maxHeight: '88%', overflow: 'hidden',
+    shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 20, shadowOffset: { width: 0, height: 8 }, elevation: 12,
+  },
+  modalHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, paddingVertical: 16,
+    borderBottomWidth: 1, borderBottomColor: '#f0f0f0',
+  },
+  modalHeaderTitle: { fontSize: 17, fontWeight: '700', color: '#111' },
+  modalCloseBtn: { width: 30, height: 30, borderRadius: 15, backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' },
+  modalCloseBtnText: { fontSize: 13, color: '#555', fontWeight: '600' },
+  modalBody: { padding: 20 },
+
+  modalIdRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
+  modalIdTag: { backgroundColor: '#f5f5f5', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
+  modalIdText: { fontSize: 12, fontFamily: 'monospace', color: '#555' },
+  printedTag: { backgroundColor: '#e8f5e9', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
+  printedTagText: { fontSize: 11, color: '#2e7d32', fontWeight: '600' },
+
+  infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
+  infoCell: { backgroundColor: '#f7f7f7', borderRadius: 10, padding: 12, width: '47%' },
+  infoCellWide: { width: '100%' },
+  infoCellLabel: { fontSize: 10, fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 },
+  infoCellValue: { fontSize: 14, fontWeight: '600', color: '#111' },
+
+  itemsSection: { borderWidth: 1, borderColor: '#f0f0f0', borderRadius: 10, marginBottom: 16, overflow: 'hidden' },
+  itemsSectionTitle: { fontSize: 11, fontWeight: '700', color: '#999', textTransform: 'uppercase', letterSpacing: 0.5, paddingHorizontal: 14, paddingVertical: 10, backgroundColor: '#fafafa', borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
+  modalItemRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 11 },
+  modalItemRowBorder: { borderBottomWidth: 1, borderBottomColor: '#f5f5f5' },
+  modalItemName: { fontSize: 14, color: '#222', flex: 1 },
+  qtyBadge: { backgroundColor: '#f0f0f0', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  qtyBadgeText: { fontSize: 12, color: '#555', fontWeight: '600' },
+
+  totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 4 },
+  totalLabel: { fontSize: 14, color: '#888', fontWeight: '600' },
+  totalValue: { fontSize: 22, fontWeight: '800', color: '#111' },
+
+  modalFooter: {
+    flexDirection: 'row', gap: 10, justifyContent: 'flex-end',
+    padding: 16, borderTopWidth: 1, borderTopColor: '#f0f0f0',
+  },
+  modalBtnClose: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, borderWidth: 1, borderColor: '#ddd' },
+  modalBtnCloseText: { fontSize: 14, color: '#555', fontWeight: '600' },
+  modalBtnReady: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8, backgroundColor: '#2e7d32' },
+  modalBtnReadyText: { fontSize: 14, color: '#fff', fontWeight: '700' },
   // Printer modal styles
   printerModalContainer: {
     flex: 1,
@@ -524,6 +617,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
+function InfoCell({ label, value, wide }: { label: string; value: string; wide?: boolean }) {
+  return (
+    <View style={[styles.infoCell, wide && styles.infoCellWide]}>
+      <Text style={styles.infoCellLabel}>{label}</Text>
+      <Text style={styles.infoCellValue}>{value}</Text>
+    </View>
+  );
+}
 
 export default OrdersCalendarScreen;
 
